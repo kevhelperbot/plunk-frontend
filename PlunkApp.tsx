@@ -587,7 +587,7 @@ export default function PlunkApp() {
   // Swipe-up confirm drawer
   const onConfirmDown = (e) => {
     confirmDragStart.current = e.clientY;
-    e.target.setPointerCapture(e.pointerId);
+    if (e.currentTarget?.setPointerCapture) e.currentTarget.setPointerCapture(e.pointerId);
   };
   const onConfirmMove = (e) => {
     if (!confirmDragStart.current) return;
@@ -1289,17 +1289,24 @@ export default function PlunkApp() {
             )}
           </div>
           {pendingOrder && currentView === 'trade' && (
-            <div className="absolute inset-0 z-[120] bg-neutral-950/75 backdrop-blur-md flex flex-col overflow-hidden pointer-events-auto">
+            <div
+              className="absolute inset-0 z-[120] bg-neutral-950/75 backdrop-blur-md flex flex-col overflow-hidden pointer-events-auto touch-none"
+              onPointerDown={onConfirmDown}
+              onPointerMove={onConfirmMove}
+              onPointerUp={onConfirmUp}
+              onPointerCancel={onConfirmUp}
+              onPointerLeave={onConfirmUp}
+            >
               <div className="px-6 pt-8 pb-4 text-center">
                 <div className="text-[11px] font-black uppercase tracking-[0.28em] text-white/60 mb-2">Confirm</div>
                 <h2 className="text-white text-2xl font-black tracking-tight">Swipe up to confirm order</h2>
-                <p className="text-white/70 text-sm font-medium mt-2">Review the trade, then drag the handle up to place it.</p>
+                <p className="text-white/70 text-sm font-medium mt-2">Swipe up anywhere on this page to place the trade.</p>
               </div>
-              <div className="flex-1 flex flex-col justify-end px-4 pb-4">
-                <div className="bg-white rounded-[2rem] p-6 pb-10 border border-white/60 shadow-2xl animate-in slide-in-from-bottom-full duration-300">
+              <div className="flex-1 flex flex-col justify-end px-4 pb-4" style={{ transform: `translateY(${Math.min(0, confirmDrag * 0.35)}px)`, transition: confirmDrag === 0 ? 'transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1)' : 'none' }}>
+                <div className="bg-white rounded-[2rem] p-6 pb-6 border border-white/60 shadow-2xl animate-in slide-in-from-bottom-full duration-300">
                   <div className="flex justify-between items-center mb-6">
                     <h3 className="font-black text-2xl text-neutral-900 tracking-tight">Confirm Order</h3>
-                    <button onClick={() => setPendingOrder(null)} className="p-2 bg-neutral-100 text-neutral-500 rounded-full hover:bg-neutral-200 transition-colors"><svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12"/></svg></button>
+                    <button onClick={(e) => { e.stopPropagation(); setPendingOrder(null); }} className="p-2 bg-neutral-100 text-neutral-500 rounded-full hover:bg-neutral-200 transition-colors"><svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12"/></svg></button>
                   </div>
                   <div className="bg-neutral-50 rounded-2xl p-5 border border-neutral-200 mb-6 shadow-inner">
                     <div className="flex justify-between items-center mb-3"><span className="text-neutral-500 font-bold text-xs uppercase tracking-widest">Contract</span><span className="font-black text-base text-neutral-900">{pendingOrder.duration.toUpperCase()} {pendingOrder.asset.ticker}</span></div>
@@ -1308,13 +1315,9 @@ export default function PlunkApp() {
                     <div className="flex justify-between items-center mb-3"><span className="text-neutral-500 font-bold text-xs uppercase tracking-widest">Avg Price</span><span className="font-black text-base text-neutral-900">${pendingOrder.formattedPrice}</span></div>
                     <div className="flex justify-between items-center mt-5 pt-4 border-t border-neutral-200"><span className="text-neutral-900 font-black text-sm uppercase tracking-widest">Est. Payout</span><span className="font-black text-2xl text-green-600">${(pendingOrder.size / pendingOrder.price).toFixed(2)}</span></div>
                   </div>
-                  <div className="relative h-24 bg-neutral-900 rounded-2xl overflow-hidden flex items-end justify-center border border-neutral-800 shadow-md pt-5">
-                    <div className="absolute top-4 inset-x-0 flex items-center justify-center text-neutral-400 font-bold text-[11px] tracking-[0.22em] uppercase pointer-events-none transition-opacity" style={{ opacity: 1 - Math.abs(confirmDrag) / 80 }}>Swipe Up <span className="hidden sm:inline-block ml-1">(or Press Enter)</span></div>
-                    <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-16 h-16 bg-white rounded-2xl shadow-lg flex flex-col items-center justify-center cursor-grab active:cursor-grabbing touch-none transition-transform"
-                      style={{ transform: `translate(-50%, ${confirmDrag}px)`, transition: confirmDrag === 0 ? 'transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1)' : 'none' }}
-                      onPointerDown={onConfirmDown} onPointerMove={onConfirmMove} onPointerUp={onConfirmUp} onPointerLeave={onConfirmUp}>
-                      <svg className="w-7 h-7 text-neutral-900" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M4 10l8-8 8 8M12 2v18"/></svg>
-                    </div>
+                  <div className={`rounded-2xl border px-5 py-4 text-center shadow-md transition-transform ${pendingOrder.direction === 'BUY' ? 'bg-green-600 border-green-500 text-white' : 'bg-red-600 border-red-500 text-white'}`} style={{ transform: `translateY(${Math.min(0, confirmDrag * 0.25)}px)`, transition: confirmDrag === 0 ? 'transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1)' : 'none' }}>
+                    <div className="text-[11px] font-black uppercase tracking-[0.24em] opacity-80 mb-1">Swipe Up</div>
+                    <div className="text-xl font-black tracking-tight">{pendingOrder.direction === 'BUY' ? 'Buy Yes' : 'Buy No'}</div>
                   </div>
                 </div>
               </div>
