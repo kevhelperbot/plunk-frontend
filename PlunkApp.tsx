@@ -833,7 +833,7 @@ export default function PlunkApp() {
             Trade Size {hotkeysEnabled && <span className="text-neutral-300 font-normal ml-1 hidden lg:inline-block">(Shift 1% · ⌘Shift 10%)</span>}
           </span>
           {sizeAdjustCue && (
-            <div className={`pointer-events-none flex items-center gap-1 text-[10px] font-black tracking-widest uppercase animate-bounce ${sizeAdjustCue.direction === 'up' ? 'text-green-600' : 'text-red-500'}`}>
+            <div className={`pointer-events-none flex items-center gap-1 text-[10px] font-black tracking-widest uppercase animate-bounce px-2.5 py-1.5 rounded-lg bg-white/50 border shadow-sm ${sizeAdjustCue.direction === 'up' ? 'text-green-600 border-green-600' : 'text-red-500 border-red-500'}`}>
               <span>{sizeAdjustCue.direction === 'up' ? '↑' : '↓'}</span>
               <span>{Math.round(sizeAdjustCue.pct * 100)}%</span>
             </div>
