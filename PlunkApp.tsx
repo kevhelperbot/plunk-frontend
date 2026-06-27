@@ -777,43 +777,44 @@ export default function PlunkApp() {
           Back to Trading
         </button>
       </div>
-      <div className="flex items-center gap-4 mb-8">
-        <div className="w-16 h-16 bg-neutral-900 rounded-full text-white flex items-center justify-center font-black text-2xl shadow-md">JD</div>
-        <div>
-          <div className="text-xl font-black text-neutral-900">John Doe</div>
-          <div className="text-sm font-bold text-neutral-500">john.doe@example.com</div>
+
+      <div className="bg-white border border-neutral-200 rounded-[2rem] p-6 md:p-8 shadow-sm max-w-2xl">
+        <div className="flex items-center gap-4 mb-8">
+          <div className="w-16 h-16 bg-neutral-900 rounded-full text-white flex items-center justify-center font-black text-2xl shadow-md">K</div>
+          <div>
+            <div className="text-xl font-black text-neutral-900">Kevin</div>
+            <div className="text-sm font-bold text-neutral-500">Account Profile</div>
+          </div>
+        </div>
+
+        <div className="space-y-4">
+          <div className="rounded-2xl border border-neutral-200 bg-neutral-50 px-5 py-4">
+            <div className="text-[11px] uppercase tracking-[0.2em] font-black text-neutral-500 mb-1">Nickname</div>
+            <div className="text-lg font-black text-neutral-900">Kevin</div>
+          </div>
+
+          <div className="rounded-2xl border border-neutral-200 bg-neutral-50 px-5 py-4">
+            <div className="text-[11px] uppercase tracking-[0.2em] font-black text-neutral-500 mb-1">Email</div>
+            <div className="text-lg font-black text-neutral-900 break-all">kevin@jpegtrading.com</div>
+          </div>
+
+          <div className="rounded-2xl border border-neutral-200 bg-neutral-50 px-5 py-4">
+            <div className="text-[11px] uppercase tracking-[0.2em] font-black text-neutral-500 mb-1">Crypto Address</div>
+            <div className="text-lg font-black text-neutral-900 break-all">0x7f3A9cB1E4D8F2609A12C53b91d7E6aa41F2c8D4</div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+            <div className="rounded-2xl border border-neutral-200 bg-neutral-50 px-5 py-4">
+              <div className="text-[11px] uppercase tracking-[0.2em] font-black text-neutral-500 mb-1">30D Volume</div>
+              <div className="text-lg font-black text-neutral-900">$62,601</div>
+            </div>
+            <div className="rounded-2xl border border-neutral-200 bg-neutral-50 px-5 py-4">
+              <div className="text-[11px] uppercase tracking-[0.2em] font-black text-neutral-500 mb-1">Fee Tier</div>
+              <div className="text-lg font-black text-neutral-900">VIP 3</div>
+            </div>
+          </div>
         </div>
       </div>
-      <div className="bg-white border border-neutral-200 rounded-2xl p-6 mb-6 shadow-sm">
-        <div className="text-xs uppercase font-bold text-neutral-500 tracking-widest mb-1">Total Balance</div>
-        <div className="text-4xl font-black text-neutral-900 tabular-nums mb-4">${balance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
-        <div className="flex gap-3">
-          <button onClick={() => setCurrentView('deposit')} className="flex-1 bg-neutral-900 text-white font-bold py-3 rounded-xl flex justify-center items-center gap-2 hover:bg-neutral-800 transition-colors shadow-sm">
-            Deposit
-          </button>
-          <button className="flex-1 bg-white border border-neutral-200 text-neutral-900 font-bold py-3 rounded-xl flex justify-center items-center gap-2 hover:bg-neutral-50 transition-colors shadow-sm">
-            Withdraw
-          </button>
-        </div>
-      </div>
-      <div className="flex flex-col gap-3 mb-8">
-        <div className="text-sm font-black tracking-widest uppercase mb-2">Recent Activity</div>
-        {orders.length === 0
-          ? <div className="text-sm font-bold text-neutral-400 py-6 text-center border-2 border-dashed border-neutral-200 rounded-xl">No recent orders</div>
-          : orders.slice(0, 5).map(order => (
-              <div key={order.id} className="flex justify-between items-center p-4 bg-white border border-neutral-200 rounded-xl shadow-sm">
-                <div className="flex items-center gap-3">
-                  <div className={`w-8 h-8 rounded-full border flex items-center justify-center font-bold text-[10px] ${order.direction === 'BUY' ? 'bg-green-50 border-green-200 text-green-700' : 'bg-red-50 border-red-200 text-red-600'}`}>{order.direction === 'BUY' ? 'YES' : 'NO'}</div>
-                  <div>
-                    <div className="font-bold text-sm text-neutral-900">{order.duration.toUpperCase()} {order.asset.ticker}</div>
-                    <div className="text-[11px] font-bold text-neutral-500">{order.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} • Avg ${order.price.toFixed(2)}</div>
-                  </div>
-                </div>
-                <div className="font-black text-sm text-neutral-900">${order.size.toFixed(2)}</div>
-              </div>
-            ))}
-      </div>
-      <button onClick={() => setCurrentView('login')} className="mt-auto w-full md:max-w-sm bg-white border border-red-200 text-red-600 font-bold py-3.5 rounded-xl hover:bg-red-50 transition-colors shadow-sm">Sign Out</button>
     </div>
   );
 
