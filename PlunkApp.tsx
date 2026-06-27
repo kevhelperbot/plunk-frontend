@@ -361,7 +361,7 @@ export default function PlunkApp() {
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [currentView, pendingOrder, tutorialStep, balance, tradeSize, hotkeysEnabled, noticeQueue, activeNotice]);
+  }, [currentView, pendingOrder, tutorialStep, balance, tradeSize, hotkeysEnabled, selectedAsset, activeCategory, activeDuration]);
 
   // ── Helpers & computed values ────────────────────────────────────────────────
   const getDecimals = (refPrice) => {
