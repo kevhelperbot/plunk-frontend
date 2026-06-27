@@ -345,17 +345,17 @@ export default function PlunkApp() {
       if (e.metaKey && e.shiftKey) {
         if (e.key === 'ArrowLeft')  { e.preventDefault(); cycleCategory(-1); return; }
         if (e.key === 'ArrowRight') { e.preventDefault(); cycleCategory(1);  return; }
-        if (e.key === 'ArrowUp')    { e.preventDefault(); adjustTradeSizeByPercent(0.25, 'up'); return; }
-        if (e.key === 'ArrowDown')  { e.preventDefault(); adjustTradeSizeByPercent(0.25, 'down'); return; }
+        if (e.key === 'ArrowUp')    { e.preventDefault(); adjustTradeSizeByPercent(0.10, 'up'); return; }
+        if (e.key === 'ArrowDown')  { e.preventDefault(); adjustTradeSizeByPercent(0.10, 'down'); return; }
       }
       if (e.shiftKey) {
-        if (e.key === 'ArrowUp')    { e.preventDefault(); adjustTradeSizeByPercent(0.05, 'up'); return; }
-        if (e.key === 'ArrowDown')  { e.preventDefault(); adjustTradeSizeByPercent(0.05, 'down'); return; }
+        if (e.key === 'ArrowUp')    { e.preventDefault(); adjustTradeSizeByPercent(0.01, 'up'); return; }
+        if (e.key === 'ArrowDown')  { e.preventDefault(); adjustTradeSizeByPercent(0.01, 'down'); return; }
         if (e.key === 'ArrowLeft')  { e.preventDefault(); cycleDuration(-1); return; }
         if (e.key === 'ArrowRight') { e.preventDefault(); cycleDuration(1);  return; }
       }
-      if (e.key === 'ArrowUp')    { e.preventDefault(); adjustTradeSizeByPercent(0.01, 'up'); return; }
-      if (e.key === 'ArrowDown')  { e.preventDefault(); adjustTradeSizeByPercent(0.01, 'down'); return; }
+      if (e.key === 'ArrowUp')    { e.preventDefault(); triggerOrderIntent('BUY'); return; }
+      if (e.key === 'ArrowDown')  { e.preventDefault(); triggerOrderIntent('SELL'); return; }
       if (e.key === 'ArrowLeft')  { e.preventDefault(); cycleMarket(-1); }
       if (e.key === 'ArrowRight') { e.preventDefault(); cycleMarket(1);  }
     };
@@ -830,7 +830,7 @@ export default function PlunkApp() {
       <div className="flex flex-col gap-2 relative">
         <div className="flex justify-between items-end px-1">
           <span className="text-[10px] uppercase font-bold tracking-widest text-neutral-500">
-            Trade Size {hotkeysEnabled && <span className="text-neutral-300 font-normal ml-1 hidden lg:inline-block">(↑↓ 1% · Shift 5% · ⌘Shift 25%)</span>}
+            Trade Size {hotkeysEnabled && <span className="text-neutral-300 font-normal ml-1 hidden lg:inline-block">(Shift 1% · ⌘Shift 10%)</span>}
           </span>
           {sizeAdjustCue && (
             <div className={`pointer-events-none flex items-center gap-1 text-[10px] font-black tracking-widest uppercase animate-bounce ${sizeAdjustCue.direction === 'up' ? 'text-green-600' : 'text-red-500'}`}>
@@ -944,7 +944,7 @@ export default function PlunkApp() {
       <div className="flex flex-col gap-1">
         <div className="flex justify-between gap-4"><span className="text-white/40">buy/sell</span><span>↑ ↓</span></div>
         <div className="flex justify-between gap-4"><span className="text-white/40">assets</span><span>← →</span></div>
-        <div className="flex justify-between gap-4"><span className="text-white/40">size</span><span>↑↓ / Shift / ⌘Shift</span></div>
+        <div className="flex justify-between gap-4"><span className="text-white/40">size</span><span>Shift / ⌘Shift</span></div>
         <div className="flex justify-between gap-4"><span className="text-white/40">duration</span><span>Shift+ ←→</span></div>
         <div className="flex justify-between gap-4"><span className="text-white/40">category</span><span>⌘Shift+ ←→</span></div>
         <div className="flex justify-between gap-4"><span className="text-white/40">confirm</span><span>Enter</span></div>
@@ -1215,7 +1215,7 @@ export default function PlunkApp() {
                 {/* Size controls */}
                 <div className="px-5 pb-2 pt-5 flex flex-col z-10 gap-3">
                   <div className="flex flex-col gap-1.5">
-                    <div className="flex justify-between items-end px-1"><span className="text-[10px] uppercase font-bold tracking-widest text-neutral-500">Trade Size <span className="text-neutral-300 font-normal ml-1 hidden sm:inline-block">(↑↓ 1% · Shift 5% · ⌘Shift 25%)</span></span></div>
+                    <div className="flex justify-between items-end px-1"><span className="text-[10px] uppercase font-bold tracking-widest text-neutral-500">Trade Size <span className="text-neutral-300 font-normal ml-1 hidden sm:inline-block">(Shift 1% · ⌘Shift 10%)</span></span></div>
                     <div className="flex gap-2">
                       <button onClick={() => setSizePercent(0.25)} className="flex-1 bg-white hover:bg-neutral-50 text-neutral-800 font-bold py-2.5 rounded-xl text-xs transition-colors border border-neutral-200 shadow-sm">25%</button>
                       <button onClick={() => setSizePercent(0.50)} className="flex-1 bg-white hover:bg-neutral-50 text-neutral-800 font-bold py-2.5 rounded-xl text-xs transition-colors border border-neutral-200 shadow-sm">50%</button>
