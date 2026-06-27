@@ -580,10 +580,6 @@ export default function PlunkApp() {
           <span className="text-neutral-500 text-[10px] uppercase font-bold tracking-widest hidden sm:inline-block">Bal</span>
           <span className="text-neutral-900 font-black tabular-nums">${balance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
         </button>
-        <button onClick={() => setShowHotkeysHelp(true)} className={`relative p-2 rounded-full transition-colors ${showHotkeysHelp ? 'bg-neutral-900 text-white' : 'text-neutral-600 bg-white border border-neutral-200 hover:bg-neutral-50 shadow-sm'} hidden md:block`} title="Keyboard Shortcuts">
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15 11a1 1 0 11-2 0 1 1 0 012 0zm-4 0a1 1 0 11-2 0 1 1 0 012 0zm-4 0a1 1 0 11-2 0 1 1 0 012 0zm11 4a1 1 0 11-2 0 1 1 0 012 0zm-4 0a1 1 0 11-2 0 1 1 0 012 0zm-4 0a1 1 0 11-2 0 1 1 0 012 0z"/><path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16a2 2 0 012 2v10a2 2 0 01-2 2H4a2 2 0 01-2-2V8a2 2 0 012-2z"/></svg>
-          <div className={`absolute top-0 right-0 w-2.5 h-2.5 rounded-full border-2 border-white ${hotkeysEnabled ? 'bg-green-500' : 'bg-neutral-400'}`}></div>
-        </button>
         <button onClick={() => setCurrentView('portfolio')} className={`p-2 rounded-full transition-colors ${currentView === 'portfolio' ? 'bg-neutral-900 text-white' : 'text-neutral-600 bg-white border border-neutral-200 hover:bg-neutral-50 shadow-sm'}`}>
           <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
         </button>
@@ -640,7 +636,12 @@ export default function PlunkApp() {
     const setActiveTab = setPortfolioActiveTab;
     return (
       <div className="flex-1 flex flex-col p-6 md:p-10 overflow-y-auto custom-scrollbar z-10 bg-[#fdfcf8] relative">
-        <h2 className="text-neutral-900 font-black tracking-tight text-3xl md:text-4xl mb-8">Portfolio</h2>
+        <div className="flex items-center justify-between gap-4 mb-8">
+          <h2 className="text-neutral-900 font-black tracking-tight text-3xl md:text-4xl">Portfolio</h2>
+          <button onClick={() => setCurrentView('trade')} className="bg-white border border-neutral-200 text-neutral-900 font-bold px-4 py-2.5 rounded-xl hover:bg-neutral-50 transition-colors shadow-sm">
+            Back to Trading
+          </button>
+        </div>
         <div className="bg-white border-2 border-neutral-900 rounded-2xl p-6 md:p-8 mb-8 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
           <div className="text-xs uppercase font-bold text-neutral-500 tracking-widest mb-1">Total Balance</div>
           <div className="text-5xl font-black text-neutral-900 tabular-nums mb-6">${balance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
@@ -721,6 +722,54 @@ export default function PlunkApp() {
       </div>
     );
   };
+
+  const ProfileView = () => (
+    <div className="flex-1 flex flex-col p-6 md:p-10 overflow-y-auto custom-scrollbar z-10 bg-[#fdfcf8] relative">
+      <div className="flex items-center justify-between gap-4 mb-8">
+        <h2 className="text-neutral-900 font-black tracking-tight text-3xl md:text-4xl">Profile</h2>
+        <button onClick={() => setCurrentView('trade')} className="bg-white border border-neutral-200 text-neutral-900 font-bold px-4 py-2.5 rounded-xl hover:bg-neutral-50 transition-colors shadow-sm">
+          Back to Trading
+        </button>
+      </div>
+      <div className="flex items-center gap-4 mb-8">
+        <div className="w-16 h-16 bg-neutral-900 rounded-full text-white flex items-center justify-center font-black text-2xl shadow-md">JD</div>
+        <div>
+          <div className="text-xl font-black text-neutral-900">John Doe</div>
+          <div className="text-sm font-bold text-neutral-500">john.doe@example.com</div>
+        </div>
+      </div>
+      <div className="bg-white border border-neutral-200 rounded-2xl p-6 mb-6 shadow-sm">
+        <div className="text-xs uppercase font-bold text-neutral-500 tracking-widest mb-1">Total Balance</div>
+        <div className="text-4xl font-black text-neutral-900 tabular-nums mb-4">${balance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+        <div className="flex gap-3">
+          <button onClick={() => setCurrentView('deposit')} className="flex-1 bg-neutral-900 text-white font-bold py-3 rounded-xl flex justify-center items-center gap-2 hover:bg-neutral-800 transition-colors shadow-sm">
+            Deposit
+          </button>
+          <button className="flex-1 bg-white border border-neutral-200 text-neutral-900 font-bold py-3 rounded-xl flex justify-center items-center gap-2 hover:bg-neutral-50 transition-colors shadow-sm">
+            Withdraw
+          </button>
+        </div>
+      </div>
+      <div className="flex flex-col gap-3 mb-8">
+        <div className="text-sm font-black tracking-widest uppercase mb-2">Recent Activity</div>
+        {orders.length === 0
+          ? <div className="text-sm font-bold text-neutral-400 py-6 text-center border-2 border-dashed border-neutral-200 rounded-xl">No recent orders</div>
+          : orders.slice(0, 5).map(order => (
+              <div key={order.id} className="flex justify-between items-center p-4 bg-white border border-neutral-200 rounded-xl shadow-sm">
+                <div className="flex items-center gap-3">
+                  <div className={`w-8 h-8 rounded-full border flex items-center justify-center font-bold text-[10px] ${order.direction === 'BUY' ? 'bg-green-50 border-green-200 text-green-700' : 'bg-red-50 border-red-200 text-red-600'}`}>{order.direction === 'BUY' ? 'YES' : 'NO'}</div>
+                  <div>
+                    <div className="font-bold text-sm text-neutral-900">{order.duration.toUpperCase()} {order.asset.ticker}</div>
+                    <div className="text-[11px] font-bold text-neutral-500">{order.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} • Avg ${order.price.toFixed(2)}</div>
+                  </div>
+                </div>
+                <div className="font-black text-sm text-neutral-900">${order.size.toFixed(2)}</div>
+              </div>
+            ))}
+      </div>
+      <button onClick={() => setCurrentView('login')} className="mt-auto w-full md:max-w-sm bg-white border border-red-200 text-red-600 font-bold py-3.5 rounded-xl hover:bg-red-50 transition-colors shadow-sm">Sign Out</button>
+    </div>
+  );
 
   const ExecutionPanel = () => (
     <div className="p-5 flex flex-col gap-4 bg-white md:bg-transparent h-full">
@@ -1184,43 +1233,42 @@ export default function PlunkApp() {
                     )}
                   </div>
 
-                  {/* Confirm drawer */}
-                  {pendingOrder && (
-                    <div className="absolute inset-0 z-50 bg-neutral-950/75 backdrop-blur-md flex flex-col overflow-hidden pointer-events-auto">
-                      <div className="px-6 pt-8 pb-4 text-center">
-                        <div className="text-[11px] font-black uppercase tracking-[0.28em] text-white/60 mb-2">Confirm</div>
-                        <h2 className="text-white text-2xl font-black tracking-tight">Swipe up to confirm order</h2>
-                        <p className="text-white/70 text-sm font-medium mt-2">Review the trade, then drag the handle up to place it.</p>
-                      </div>
-                      <div className="flex-1 flex flex-col justify-end px-4 pb-4">
-                        <div className="bg-white rounded-[2rem] p-6 pb-10 border border-white/60 shadow-2xl animate-in slide-in-from-bottom-full duration-300">
-                          <div className="flex justify-between items-center mb-6">
-                            <h3 className="font-black text-2xl text-neutral-900 tracking-tight">Confirm Order</h3>
-                            <button onClick={() => setPendingOrder(null)} className="p-2 bg-neutral-100 text-neutral-500 rounded-full hover:bg-neutral-200 transition-colors"><svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12"/></svg></button>
-                          </div>
-                          <div className="bg-neutral-50 rounded-2xl p-5 border border-neutral-200 mb-6 shadow-inner">
-                            <div className="flex justify-between items-center mb-3"><span className="text-neutral-500 font-bold text-xs uppercase tracking-widest">Contract</span><span className="font-black text-base text-neutral-900">{pendingOrder.duration.toUpperCase()} {pendingOrder.asset.ticker}</span></div>
-                            <div className="flex justify-between items-center mb-3"><span className="text-neutral-500 font-bold text-xs uppercase tracking-widest">Side</span><span className={`font-black text-sm px-2.5 py-0.5 rounded-md ${pendingOrder.direction === 'BUY' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-600'}`}>{pendingOrder.direction === 'BUY' ? 'YES' : 'NO'}</span></div>
-                            <div className="flex justify-between items-center mb-3"><span className="text-neutral-500 font-bold text-xs uppercase tracking-widest">Size</span><span className="font-black text-base text-neutral-900">${pendingOrder.size.toFixed(2)}</span></div>
-                            <div className="flex justify-between items-center mb-3"><span className="text-neutral-500 font-bold text-xs uppercase tracking-widest">Avg Price</span><span className="font-black text-base text-neutral-900">${pendingOrder.formattedPrice}</span></div>
-                            <div className="flex justify-between items-center mt-5 pt-4 border-t border-neutral-200"><span className="text-neutral-900 font-black text-sm uppercase tracking-widest">Est. Payout</span><span className="font-black text-2xl text-green-600">${(pendingOrder.size / pendingOrder.price).toFixed(2)}</span></div>
-                          </div>
-                          <div className="relative h-24 bg-neutral-900 rounded-2xl overflow-hidden flex items-end justify-center border border-neutral-800 shadow-md pt-5">
-                            <div className="absolute top-4 inset-x-0 flex items-center justify-center text-neutral-400 font-bold text-[11px] tracking-[0.22em] uppercase pointer-events-none transition-opacity" style={{ opacity: 1 - Math.abs(confirmDrag) / 80 }}>Swipe Up <span className="hidden sm:inline-block ml-1">(or Press Enter)</span></div>
-                            <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-16 h-16 bg-white rounded-2xl shadow-lg flex flex-col items-center justify-center cursor-grab active:cursor-grabbing touch-none transition-transform"
-                              style={{ transform: `translate(-50%, ${confirmDrag}px)`, transition: confirmDrag === 0 ? 'transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1)' : 'none' }}
-                              onPointerDown={onConfirmDown} onPointerMove={onConfirmMove} onPointerUp={onConfirmUp} onPointerLeave={onConfirmUp}>
-                              <svg className="w-7 h-7 text-neutral-900" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M4 10l8-8 8 8M12 2v18"/></svg>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  )}
                 </div>
               </div>
             )}
           </div>
+          {pendingOrder && currentView === 'trade' && (
+            <div className="absolute inset-0 z-[120] bg-neutral-950/75 backdrop-blur-md flex flex-col overflow-hidden pointer-events-auto">
+              <div className="px-6 pt-8 pb-4 text-center">
+                <div className="text-[11px] font-black uppercase tracking-[0.28em] text-white/60 mb-2">Confirm</div>
+                <h2 className="text-white text-2xl font-black tracking-tight">Swipe up to confirm order</h2>
+                <p className="text-white/70 text-sm font-medium mt-2">Review the trade, then drag the handle up to place it.</p>
+              </div>
+              <div className="flex-1 flex flex-col justify-end px-4 pb-4">
+                <div className="bg-white rounded-[2rem] p-6 pb-10 border border-white/60 shadow-2xl animate-in slide-in-from-bottom-full duration-300">
+                  <div className="flex justify-between items-center mb-6">
+                    <h3 className="font-black text-2xl text-neutral-900 tracking-tight">Confirm Order</h3>
+                    <button onClick={() => setPendingOrder(null)} className="p-2 bg-neutral-100 text-neutral-500 rounded-full hover:bg-neutral-200 transition-colors"><svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12"/></svg></button>
+                  </div>
+                  <div className="bg-neutral-50 rounded-2xl p-5 border border-neutral-200 mb-6 shadow-inner">
+                    <div className="flex justify-between items-center mb-3"><span className="text-neutral-500 font-bold text-xs uppercase tracking-widest">Contract</span><span className="font-black text-base text-neutral-900">{pendingOrder.duration.toUpperCase()} {pendingOrder.asset.ticker}</span></div>
+                    <div className="flex justify-between items-center mb-3"><span className="text-neutral-500 font-bold text-xs uppercase tracking-widest">Side</span><span className={`font-black text-sm px-2.5 py-0.5 rounded-md ${pendingOrder.direction === 'BUY' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-600'}`}>{pendingOrder.direction === 'BUY' ? 'YES' : 'NO'}</span></div>
+                    <div className="flex justify-between items-center mb-3"><span className="text-neutral-500 font-bold text-xs uppercase tracking-widest">Size</span><span className="font-black text-base text-neutral-900">${pendingOrder.size.toFixed(2)}</span></div>
+                    <div className="flex justify-between items-center mb-3"><span className="text-neutral-500 font-bold text-xs uppercase tracking-widest">Avg Price</span><span className="font-black text-base text-neutral-900">${pendingOrder.formattedPrice}</span></div>
+                    <div className="flex justify-between items-center mt-5 pt-4 border-t border-neutral-200"><span className="text-neutral-900 font-black text-sm uppercase tracking-widest">Est. Payout</span><span className="font-black text-2xl text-green-600">${(pendingOrder.size / pendingOrder.price).toFixed(2)}</span></div>
+                  </div>
+                  <div className="relative h-24 bg-neutral-900 rounded-2xl overflow-hidden flex items-end justify-center border border-neutral-800 shadow-md pt-5">
+                    <div className="absolute top-4 inset-x-0 flex items-center justify-center text-neutral-400 font-bold text-[11px] tracking-[0.22em] uppercase pointer-events-none transition-opacity" style={{ opacity: 1 - Math.abs(confirmDrag) / 80 }}>Swipe Up <span className="hidden sm:inline-block ml-1">(or Press Enter)</span></div>
+                    <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-16 h-16 bg-white rounded-2xl shadow-lg flex flex-col items-center justify-center cursor-grab active:cursor-grabbing touch-none transition-transform"
+                      style={{ transform: `translate(-50%, ${confirmDrag}px)`, transition: confirmDrag === 0 ? 'transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1)' : 'none' }}
+                      onPointerDown={onConfirmDown} onPointerMove={onConfirmMove} onPointerUp={onConfirmUp} onPointerLeave={onConfirmUp}>
+                      <svg className="w-7 h-7 text-neutral-900" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M4 10l8-8 8 8M12 2v18"/></svg>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
         {errorMsg && (
           <div className="fixed top-6 left-1/2 -translate-x-1/2 z-[999] bg-red-600 text-white text-xs font-bold px-4 py-3 rounded-2xl shadow-xl max-w-[320px] text-center animate-bounce-in">
@@ -1265,14 +1313,16 @@ export default function PlunkApp() {
         <div className="w-full h-[100dvh] md:max-w-[1400px] md:h-[85vh] bg-[#fdfcf8] md:rounded-[2rem] shadow-2xl overflow-hidden flex flex-col md:flex-row border-0 md:border-2 border-neutral-200 relative">
 
           {/* Left panel — market selector */}
-          <div className={`w-full md:w-[320px] bg-[#fdfcf8] border-r border-neutral-200 flex flex-col ${currentView === 'products' ? 'flex' : 'hidden md:flex'}`}>
+          <div className={`w-full md:w-[320px] bg-[#fdfcf8] border-r border-neutral-200 flex flex-col ${['trade', 'products'].includes(currentView) ? 'flex' : 'hidden'}`}>
             <MarketSelectorPanel />
           </div>
 
-          {/* Center — chart / portfolio */}
-          <div className={`flex-1 relative flex flex-col bg-[#fdfcf8] overflow-hidden ${['trade', 'portfolio'].includes(currentView) ? 'flex' : 'hidden md:flex'}`}>
+          {/* Center — chart / portfolio / profile */}
+          <div className={`flex-1 relative flex flex-col bg-[#fdfcf8] overflow-hidden ${['trade', 'portfolio', 'profile'].includes(currentView) ? 'flex' : 'hidden md:flex'}`}>
             {currentView === 'portfolio' ? (
               <PortfolioView />
+            ) : currentView === 'profile' ? (
+              <ProfileView />
             ) : (
               <>
                 <div className="absolute inset-0 dot-pattern z-0 opacity-60"></div>
@@ -1343,34 +1393,10 @@ export default function PlunkApp() {
           </div>
 
           {/* Right panel — header + execution */}
-          <div className={`w-full md:w-[350px] bg-[#fdfcf8] border-l border-neutral-200 flex flex-col z-20 ${['profile', 'deposit', 'positions'].includes(currentView) ? 'flex' : 'hidden md:flex'}`}>
+          <div className={`w-full md:w-[350px] bg-[#fdfcf8] border-l border-neutral-200 flex flex-col z-20 ${currentView === 'trade' ? 'flex' : 'hidden'}`}>
             <div className="hidden md:block"><HeaderNav /></div>
             <ExecutionPanel />
           </div>
-
-          {/* Hotkeys help modal */}
-          {showHotkeysHelp && (
-            <div className="fixed inset-0 z-60 flex items-center justify-center p-4">
-              <div className="absolute inset-0 bg-neutral-900/40 backdrop-blur-sm" onClick={() => setShowHotkeysHelp(false)}></div>
-              <div className="bg-white rounded-3xl border border-neutral-200 shadow-2xl p-6 w-full max-w-md relative z-10 animate-in zoom-in-95">
-                <div className="flex justify-between items-center mb-6">
-                  <h3 className="text-xl font-black text-neutral-900">Keyboard Controls</h3>
-                  <button onClick={() => setShowHotkeysHelp(false)} className="p-2 bg-neutral-100 hover:bg-neutral-200 rounded-full transition-colors text-neutral-600"><svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12"/></svg></button>
-                </div>
-                <div className="flex items-center justify-between p-4 bg-neutral-50 rounded-xl border border-neutral-200 mb-6 shadow-sm">
-                  <div><div className="font-bold text-sm text-neutral-900">Enable Hotkeys</div><div className="text-xs font-bold text-neutral-500 mt-0.5">Allow lightning-fast keyboard trading</div></div>
-                  <button onClick={() => setHotkeysEnabled(!hotkeysEnabled)} className={`w-12 h-6 rounded-full transition-colors relative shadow-inner ${hotkeysEnabled ? 'bg-green-500' : 'bg-neutral-300'}`}><div className={`w-4 h-4 bg-white rounded-full absolute top-1 shadow-sm transition-transform ${hotkeysEnabled ? 'translate-x-7' : 'translate-x-1'}`}></div></button>
-                </div>
-                <div className={`space-y-4 transition-opacity ${hotkeysEnabled ? 'opacity-100' : 'opacity-40 pointer-events-none'}`}>
-                  <div className="flex justify-between items-center"><span className="text-sm font-bold text-neutral-600">Buy / Sell</span><div className="flex gap-1.5"><kbd className="px-2 py-1 bg-white border border-neutral-200 shadow-sm rounded-md font-mono text-xs font-black">↑</kbd><kbd className="px-2 py-1 bg-white border border-neutral-200 shadow-sm rounded-md font-mono text-xs font-black">↓</kbd></div></div>
-                  <div className="flex justify-between items-center"><span className="text-sm font-bold text-neutral-600">Cycle Markets</span><div className="flex gap-1.5"><kbd className="px-2 py-1 bg-white border border-neutral-200 shadow-sm rounded-md font-mono text-xs font-black">←</kbd><kbd className="px-2 py-1 bg-white border border-neutral-200 shadow-sm rounded-md font-mono text-xs font-black">→</kbd></div></div>
-                  <div className="flex justify-between items-center"><span className="text-sm font-bold text-neutral-600">Cycle Categories</span><div className="flex gap-1.5 items-center"><kbd className="px-2 py-1 bg-white border border-neutral-200 shadow-sm rounded-md font-mono text-xs font-black">⌘</kbd><span className="text-neutral-400 font-bold">+</span><kbd className="px-2 py-1 bg-white border border-neutral-200 shadow-sm rounded-md font-mono text-xs font-black">Shift</kbd><span className="text-neutral-400 font-bold">+</span><kbd className="px-2 py-1 bg-white border border-neutral-200 shadow-sm rounded-md font-mono text-xs font-black">←</kbd><kbd className="px-2 py-1 bg-white border border-neutral-200 shadow-sm rounded-md font-mono text-xs font-black">→</kbd></div></div>
-                  <div className="flex justify-between items-center"><span className="text-sm font-bold text-neutral-600">Adjust Size (±$50)</span><div className="flex gap-1.5 items-center"><kbd className="px-2 py-1 bg-white border border-neutral-200 shadow-sm rounded-md font-mono text-xs font-black">Shift</kbd><span className="text-neutral-400 font-bold">+</span><kbd className="px-2 py-1 bg-white border border-neutral-200 shadow-sm rounded-md font-mono text-xs font-black">↑</kbd><kbd className="px-2 py-1 bg-white border border-neutral-200 shadow-sm rounded-md font-mono text-xs font-black">↓</kbd></div></div>
-                  <div className="flex justify-between items-center"><span className="text-sm font-bold text-neutral-600">Cycle Durations</span><div className="flex gap-1.5 items-center"><kbd className="px-2 py-1 bg-white border border-neutral-200 shadow-sm rounded-md font-mono text-xs font-black">Shift</kbd><span className="text-neutral-400 font-bold">+</span><kbd className="px-2 py-1 bg-white border border-neutral-200 shadow-sm rounded-md font-mono text-xs font-black">←</kbd><kbd className="px-2 py-1 bg-white border border-neutral-200 shadow-sm rounded-md font-mono text-xs font-black">→</kbd></div></div>
-                </div>
-              </div>
-            </div>
-          )}
 
         </div>
       )}
