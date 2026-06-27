@@ -896,11 +896,16 @@ export default function PlunkApp() {
   const TUTORIAL_TOTAL = 5;
   const tutorialContent = [
     null,
-    { title: 'Welcome', body: 'Predict if prices go up or down. Get it right and win 2x+ your stake.' },
-    { title: 'Markets', body: 'Switch between Crypto, US, and Asian equities. The percentages show live win probability.' },
-    { title: 'Timeframe', body: 'The countdown is synced to real time. All bets settle when it hits zero.' },
-    { title: 'Trading', body: isMobile ? 'On mobile, swipe right to buy YES and swipe left to buy NO. The market card only moves side to side.' : 'Use ↑ BUY / ↓ SELL, ← → cycle assets. Shift+arrows for size & duration.' },
-    { title: 'Confirm', body: isMobile ? 'After choosing a side, the confirmation screen takes over. Swipe up to confirm the order.' : 'Positions settle automatically at expiry. Winners pay $1 per share — profit = payout minus your entry price.' },
+    {
+      title: isMobile ? 'Swipe to Trade' : 'Use Hotkeys',
+      body: isMobile
+        ? 'Swipe to trade: swipe right to buy YES, swipe left to buy NO, and swipe up to confirm your order.'
+        : 'Use hotkeys to navigate and trade faster: ↑ buy yes, ↓ buy no, ← → switch markets, Shift+←→ change duration, and Shift/⌘Shift+↑↓ adjust size. You can find this cheat sheet in the bottom-right corner.'
+    },
+    { title: 'Markets', body: 'Switch between Crypto, US, and Asian markets, then pick the contract you want to trade.' },
+    { title: 'Timeframe', body: 'Pick the duration you want to trade. The countdown is synced to real time and contracts settle when it hits zero.' },
+    { title: 'Sizing', body: isMobile ? 'Set your trade size above the card before you swipe into a position.' : 'Set your trade size in the right panel before entering the trade.' },
+    { title: 'Confirm', body: isMobile ? 'After choosing a side, the confirmation screen takes over so you can review and swipe up anywhere to place the order.' : 'Review the confirmation screen, then press Enter or click the Buy Yes / Buy No action button to place the trade.' },
   ];
   // Position classes per step: [mobile, desktop]
   const tipPosition = [
