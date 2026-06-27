@@ -142,15 +142,16 @@ export default function PlunkApp() {
   const [orders, setOrders] = useState([]);       // mobile: full order log
   const [portfolioTab, setPortfolioTab] = useState('positions');
   const [pendingOrder, setPendingOrder] = useState(null);
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [confirmDrag, setConfirmDrag] = useState(0);
   const [dragPos, setDragPos] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
+  const [noticeQueue, setNoticeQueue] = useState([]);
+  const [activeNotice, setActiveNotice] = useState(null);
+  const [sizeAdjustCue, setSizeAdjustCue] = useState(null);
 
   // Desktop-only UI state
   const [portfolioActiveTab, setPortfolioActiveTab] = useState('open');
   const [hotkeysEnabled, setHotkeysEnabled] = useState(true);
-  const [showHotkeysHelp, setShowHotkeysHelp] = useState(false);
   const [tutorialStep, setTutorialStep] = useState(0); // 0 = off, 1-5 = active step
 
   // ── Refs ────────────────────────────────────────────────────────────────────
@@ -165,6 +166,8 @@ export default function PlunkApp() {
   const positionsRef = useRef([]);
   const periodOpenPriceRef = useRef(assets[0].price);
   const selectedAssetTickerRef = useRef(assets[0].ticker);
+  const noticeTimerRef = useRef(null);
+  const sizeCueTimerRef = useRef(null);
 
   // Keep refs in sync so callbacks always see current values
   useEffect(() => { dataRef.current = data; }, [data]);
@@ -203,6 +206,12 @@ export default function PlunkApp() {
               ? (pos.direction === 'BUY' ? settlementPrice > openPrice : settlementPrice < openPrice)
               : (Math.random() < (pos.direction === 'BUY' ? pos.price : 1 - pos.price));
             if (won) payout += pos.shares;
+            const profit = won ? Math.max(0, pos.shares - pos.size) : 0;
+            enqueueNotice({
+              type: won ? 'success' : 'settlement',
+              title: `${pos.duration.toUpperCase()} ${pos.asset.ticker} settled at $${formatAssetPrice(settlementPrice, settlementPrice)}`,
+              body: won ? `Won ${profit > 0 ? `+$${profit.toFixed(2)}` : 'this market'}` : 'Lost this market'
+            });
           });
           setPositions(prev => prev.filter(p => p.duration !== dur));
           if (payout > 0) setBalance(b => Math.max(0, b + payout));
@@ -298,6 +307,21 @@ export default function PlunkApp() {
     };
   }, [currentView, selectedAsset.ticker]);
 
+  useEffect(() => {
+    if (activeNotice || noticeQueue.length === 0) return;
+    setActiveNotice(noticeQueue[0]);
+    setNoticeQueue(prev => prev.slice(1));
+  }, [noticeQueue, activeNotice]);
+
+  useEffect(() => {
+    if (!activeNotice) return;
+    if (noticeTimerRef.current) clearTimeout(noticeTimerRef.current);
+    noticeTimerRef.current = setTimeout(() => setActiveNotice(null), activeNotice.durationMs ?? 2600);
+    return () => {
+      if (noticeTimerRef.current) clearTimeout(noticeTimerRef.current);
+    };
+  }, [activeNotice]);
+
   // Keyboard shortcuts (desktop-focused, but shared handler)
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -307,12 +331,6 @@ export default function PlunkApp() {
       if (tutorialStep > 0 && e.key === 'Escape') {
         e.preventDefault();
         setTutorialStep(0);
-        return;
-      }
-
-      if (showHotkeysHelp && e.key === 'Escape') {
-        e.preventDefault();
-        setShowHotkeysHelp(false);
         return;
       }
 
@@ -327,21 +345,23 @@ export default function PlunkApp() {
       if (e.metaKey && e.shiftKey) {
         if (e.key === 'ArrowLeft')  { e.preventDefault(); cycleCategory(-1); return; }
         if (e.key === 'ArrowRight') { e.preventDefault(); cycleCategory(1);  return; }
+        if (e.key === 'ArrowUp')    { e.preventDefault(); adjustTradeSizeByPercent(0.25, 'up'); return; }
+        if (e.key === 'ArrowDown')  { e.preventDefault(); adjustTradeSizeByPercent(0.25, 'down'); return; }
       }
       if (e.shiftKey) {
-        if (e.key === 'ArrowUp')    { e.preventDefault(); setTradeSize(p => Math.min(balance, p + 50)); return; }
-        if (e.key === 'ArrowDown')  { e.preventDefault(); setTradeSize(p => Math.max(1, p - 50));      return; }
+        if (e.key === 'ArrowUp')    { e.preventDefault(); adjustTradeSizeByPercent(0.05, 'up'); return; }
+        if (e.key === 'ArrowDown')  { e.preventDefault(); adjustTradeSizeByPercent(0.05, 'down'); return; }
         if (e.key === 'ArrowLeft')  { e.preventDefault(); cycleDuration(-1); return; }
         if (e.key === 'ArrowRight') { e.preventDefault(); cycleDuration(1);  return; }
       }
-      if (e.key === 'ArrowUp')    { e.preventDefault(); triggerOrderIntent('BUY');  }
-      if (e.key === 'ArrowDown')  { e.preventDefault(); triggerOrderIntent('SELL'); }
+      if (e.key === 'ArrowUp')    { e.preventDefault(); adjustTradeSizeByPercent(0.01, 'up'); return; }
+      if (e.key === 'ArrowDown')  { e.preventDefault(); adjustTradeSizeByPercent(0.01, 'down'); return; }
       if (e.key === 'ArrowLeft')  { e.preventDefault(); cycleMarket(-1); }
       if (e.key === 'ArrowRight') { e.preventDefault(); cycleMarket(1);  }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [currentView, pendingOrder, showHotkeysHelp, tutorialStep, balance, selectedAsset, activeCategory, activeDuration, tradeSize, hotkeysEnabled]);
+  }, [currentView, pendingOrder, tutorialStep, balance, tradeSize, hotkeysEnabled, noticeQueue, activeNotice]);
 
   // ── Helpers & computed values ────────────────────────────────────────────────
   const getDecimals = (refPrice) => {
@@ -398,6 +418,24 @@ export default function PlunkApp() {
     return (currentPriceForSide - pos.price) * pos.shares;
   };
 
+  const enqueueNotice = (notice) => setNoticeQueue(prev => [...prev, { id: Date.now() + Math.random(), durationMs: 2600, ...notice }]);
+
+  const flashSizeAdjustCue = (direction, pct) => {
+    setSizeAdjustCue({ direction, pct });
+    if (sizeCueTimerRef.current) clearTimeout(sizeCueTimerRef.current);
+    sizeCueTimerRef.current = setTimeout(() => setSizeAdjustCue(null), 1000);
+  };
+
+  const adjustTradeSizeByPercent = (pct, direction) => {
+    const delta = balance * pct;
+    const minSize = balance <= 0 ? 0 : Math.min(1, balance);
+    setTradeSize(prev => {
+      const next = direction === 'up' ? prev + delta : prev - delta;
+      return Math.max(minSize, Math.min(balance, Math.round(next)));
+    });
+    flashSizeAdjustCue(direction, pct);
+  };
+
   const setSizePercent = (pct) => setTradeSize(Math.floor(balance * pct));
 
   // ── Navigation handlers ──────────────────────────────────────────────────────
@@ -447,8 +485,7 @@ export default function PlunkApp() {
 
   // ── Order flow ───────────────────────────────────────────────────────────────
   const showError = (msg: string) => {
-    setErrorMsg(msg);
-    setTimeout(() => setErrorMsg(null), 2500);
+    enqueueNotice({ type: 'error', title: 'Order error', body: msg });
   };
 
   const triggerOrderIntent = (direction) => {
@@ -473,7 +510,11 @@ export default function PlunkApp() {
   // Unified executeOrder — uses mobile's richer shares model (works for both layouts)
   const executeOrder = () => {
     if (!pendingOrder) return;
-    if (pendingOrder.size > balance) { setPendingOrder(null); return; } // funds depleted since intent
+    if (pendingOrder.size > balance) {
+      setPendingOrder(null);
+      showError(`Insufficient funds — you need $${pendingOrder.size.toFixed(2)} but only have $${balance.toFixed(2)}`);
+      return;
+    } // funds depleted since intent
     const orderShares = pendingOrder.size / pendingOrder.price;
     setOrders(prev => [{ id: Date.now(), ...pendingOrder, shares: orderShares, timestamp: new Date() }, ...prev]);
 
@@ -513,6 +554,11 @@ export default function PlunkApp() {
 
     setBalance(newBalance);
     setPositions(newPositions);
+    enqueueNotice({
+      type: 'success',
+      title: `${pendingOrder.duration.toUpperCase()} ${pendingOrder.asset.ticker} filled`,
+      body: `${pendingOrder.direction === 'BUY' ? 'YES' : 'NO'} • $${pendingOrder.size.toFixed(2)} @ $${pendingOrder.formattedPrice}`
+    });
     setPendingOrder(null);
     setConfirmDrag(0);
     setDragPos({ x: 0, y: 0 });
@@ -773,11 +819,17 @@ export default function PlunkApp() {
 
   const ExecutionPanel = () => (
     <div className="p-5 flex flex-col gap-4 bg-white md:bg-transparent h-full">
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-2 relative">
         <div className="flex justify-between items-end px-1">
           <span className="text-[10px] uppercase font-bold tracking-widest text-neutral-500">
-            Trade Size {hotkeysEnabled && <span className="text-neutral-300 font-normal ml-1 hidden lg:inline-block">(Shift+↑/↓)</span>}
+            Trade Size {hotkeysEnabled && <span className="text-neutral-300 font-normal ml-1 hidden lg:inline-block">(↑↓ 1% · Shift 5% · ⌘Shift 25%)</span>}
           </span>
+          {sizeAdjustCue && (
+            <div className={`pointer-events-none flex items-center gap-1 text-[10px] font-black tracking-widest uppercase animate-bounce ${sizeAdjustCue.direction === 'up' ? 'text-green-600' : 'text-red-500'}`}>
+              <span>{sizeAdjustCue.direction === 'up' ? '↑' : '↓'}</span>
+              <span>{Math.round(sizeAdjustCue.pct * 100)}%</span>
+            </div>
+          )}
         </div>
         <div className="flex gap-2">
           <button onClick={() => setSizePercent(0.25)} className="flex-1 bg-white hover:bg-neutral-50 text-neutral-900 font-bold py-2.5 rounded-xl text-xs transition-colors border border-neutral-200 shadow-sm">25%</button>
@@ -793,12 +845,10 @@ export default function PlunkApp() {
         <button onClick={() => triggerOrderIntent('SELL')} className="flex-1 py-4 flex flex-col items-center justify-center text-red-500 bg-white hover:bg-red-50 transition-colors border border-neutral-200 shadow-sm rounded-xl active:bg-red-100 active:translate-y-px">
           <span className="text-[10px] font-black tracking-widest uppercase mb-0.5 opacity-80 flex items-center gap-1"><svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>Sell</span>
           <span className="text-xl font-black tracking-tighter text-neutral-900">${formattedSell}</span>
-          {hotkeysEnabled && <span className="text-[9px] font-bold text-neutral-400 mt-1 tracking-widest hidden lg:block">PRESS ↓</span>}
         </button>
         <button onClick={() => triggerOrderIntent('BUY')} className="flex-1 py-4 flex flex-col items-center justify-center text-green-600 bg-white hover:bg-green-50 transition-colors border border-neutral-200 shadow-sm rounded-xl active:bg-green-100 active:translate-y-px">
           <span className="text-[10px] font-black tracking-widest uppercase mb-0.5 opacity-80 flex items-center gap-1">Buy<svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg></span>
           <span className="text-xl font-black tracking-tighter text-neutral-900">${formattedBuy}</span>
-          {hotkeysEnabled && <span className="text-[9px] font-bold text-neutral-400 mt-1 tracking-widest hidden lg:block">PRESS ↑</span>}
         </button>
       </div>
       <div className="mt-4 flex-1 overflow-y-auto">
@@ -886,7 +936,7 @@ export default function PlunkApp() {
       <div className="flex flex-col gap-1">
         <div className="flex justify-between gap-4"><span className="text-white/40">buy/sell</span><span>↑ ↓</span></div>
         <div className="flex justify-between gap-4"><span className="text-white/40">assets</span><span>← →</span></div>
-        <div className="flex justify-between gap-4"><span className="text-white/40">size</span><span>Shift+ ↑↓</span></div>
+        <div className="flex justify-between gap-4"><span className="text-white/40">size</span><span>↑↓ / Shift / ⌘Shift</span></div>
         <div className="flex justify-between gap-4"><span className="text-white/40">duration</span><span>Shift+ ←→</span></div>
         <div className="flex justify-between gap-4"><span className="text-white/40">category</span><span>⌘Shift+ ←→</span></div>
         <div className="flex justify-between gap-4"><span className="text-white/40">confirm</span><span>Enter</span></div>
@@ -1152,7 +1202,7 @@ export default function PlunkApp() {
                 {/* Size controls */}
                 <div className="px-5 pb-2 pt-5 flex flex-col z-10 gap-3">
                   <div className="flex flex-col gap-1.5">
-                    <div className="flex justify-between items-end px-1"><span className="text-[10px] uppercase font-bold tracking-widest text-neutral-500">Trade Size <span className="text-neutral-300 font-normal ml-1 hidden sm:inline-block">(Shift+↑/↓)</span></span></div>
+                    <div className="flex justify-between items-end px-1"><span className="text-[10px] uppercase font-bold tracking-widest text-neutral-500">Trade Size <span className="text-neutral-300 font-normal ml-1 hidden sm:inline-block">(↑↓ 1% · Shift 5% · ⌘Shift 25%)</span></span></div>
                     <div className="flex gap-2">
                       <button onClick={() => setSizePercent(0.25)} className="flex-1 bg-white hover:bg-neutral-50 text-neutral-800 font-bold py-2.5 rounded-xl text-xs transition-colors border border-neutral-200 shadow-sm">25%</button>
                       <button onClick={() => setSizePercent(0.50)} className="flex-1 bg-white hover:bg-neutral-50 text-neutral-800 font-bold py-2.5 rounded-xl text-xs transition-colors border border-neutral-200 shadow-sm">50%</button>
@@ -1270,9 +1320,10 @@ export default function PlunkApp() {
             </div>
           )}
         </div>
-        {errorMsg && (
-          <div className="fixed top-6 left-1/2 -translate-x-1/2 z-[999] bg-red-600 text-white text-xs font-bold px-4 py-3 rounded-2xl shadow-xl max-w-[320px] text-center animate-bounce-in">
-            {errorMsg}
+        {activeNotice && (
+          <div className={`fixed left-1/2 -translate-x-1/2 bottom-6 z-[999] max-w-[360px] w-[calc(100vw-2rem)] rounded-2xl px-4 py-3 shadow-2xl border backdrop-blur-sm ${activeNotice.type === 'error' ? 'bg-red-600 text-white border-red-500' : activeNotice.type === 'success' ? 'bg-neutral-900 text-white border-neutral-800' : 'bg-white/95 text-neutral-900 border-neutral-200'}`}>
+            <div className="text-xs font-black uppercase tracking-widest opacity-80">{activeNotice.title}</div>
+            <div className={`text-sm font-bold mt-1 ${activeNotice.type === 'error' ? 'text-white' : activeNotice.type === 'success' ? 'text-white/85' : 'text-neutral-600'}`}>{activeNotice.body}</div>
           </div>
         )}
         {tutorialOverlay}
@@ -1401,9 +1452,10 @@ export default function PlunkApp() {
         </div>
       )}
 
-      {errorMsg && (
-        <div className="fixed top-6 left-1/2 -translate-x-1/2 z-[999] bg-red-600 text-white text-xs font-bold px-4 py-3 rounded-2xl shadow-xl max-w-[320px] text-center">
-          {errorMsg}
+      {activeNotice && (
+        <div className={`fixed left-1/2 -translate-x-1/2 bottom-6 z-[999] max-w-[420px] w-[calc(100vw-2rem)] rounded-2xl px-4 py-3 shadow-2xl border backdrop-blur-sm ${activeNotice.type === 'error' ? 'bg-red-600 text-white border-red-500' : activeNotice.type === 'success' ? 'bg-neutral-900 text-white border-neutral-800' : 'bg-white/95 text-neutral-900 border-neutral-200'}`}>
+          <div className="text-xs font-black uppercase tracking-widest opacity-80">{activeNotice.title}</div>
+          <div className={`text-sm font-bold mt-1 ${activeNotice.type === 'error' ? 'text-white' : activeNotice.type === 'success' ? 'text-white/85' : 'text-neutral-600'}`}>{activeNotice.body}</div>
         </div>
       )}
       {tutorialOverlay}
