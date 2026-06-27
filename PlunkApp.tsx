@@ -586,18 +586,25 @@ export default function PlunkApp() {
 
   // Swipe-up confirm drawer
   const onConfirmDown = (e) => {
+    if (!pendingOrder) return;
     confirmDragStart.current = e.clientY;
+    setConfirmDrag(0);
     if (e.currentTarget?.setPointerCapture) e.currentTarget.setPointerCapture(e.pointerId);
   };
   const onConfirmMove = (e) => {
-    if (!confirmDragStart.current) return;
+    if (!pendingOrder || confirmDragStart.current === 0) return;
     const delta = e.clientY - confirmDragStart.current;
-    if (delta < 0) setConfirmDrag(delta);
+    setConfirmDrag(Math.min(0, delta));
   };
-  const onConfirmUp = () => {
-    if (confirmDrag < -80) executeOrder();
-    else setConfirmDrag(0);
+  const onConfirmUp = (e) => {
+    if (e?.currentTarget?.releasePointerCapture && e.pointerId !== undefined) {
+      try { e.currentTarget.releasePointerCapture(e.pointerId); } catch {}
+    }
+    if (confirmDragStart.current === 0) return;
+    const shouldConfirm = confirmDrag < -80;
     confirmDragStart.current = 0;
+    if (shouldConfirm) executeOrder();
+    else setConfirmDrag(0);
   };
 
   // Mobile card transform values
@@ -1300,14 +1307,13 @@ export default function PlunkApp() {
               onPointerMove={onConfirmMove}
               onPointerUp={onConfirmUp}
               onPointerCancel={onConfirmUp}
-              onPointerLeave={onConfirmUp}
             >
               <div className="px-6 pt-8 pb-4 text-center">
                 <div className="text-[11px] font-black uppercase tracking-[0.28em] text-white/60 mb-2">Confirm</div>
                 <h2 className="text-white text-2xl font-black tracking-tight">Swipe up to confirm order</h2>
                 <p className="text-white/70 text-sm font-medium mt-2">Swipe up anywhere on this page to place the trade.</p>
               </div>
-              <div className="flex-1 flex flex-col justify-end px-4 pb-4" style={{ transform: `translateY(${Math.min(0, confirmDrag * 0.35)}px)`, transition: confirmDrag === 0 ? 'transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1)' : 'none' }}>
+              <div className="flex-1 flex flex-col justify-end px-4 pb-4 select-none" style={{ transform: `translateY(${Math.min(0, confirmDrag * 0.35)}px)`, transition: confirmDrag === 0 ? 'transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1)' : 'none' }}>
                 <div className="bg-white rounded-[2rem] p-6 pb-6 border border-white/60 shadow-2xl animate-in slide-in-from-bottom-full duration-300">
                   <div className="flex justify-between items-center mb-6">
                     <h3 className="font-black text-2xl text-neutral-900 tracking-tight">Confirm Order</h3>
