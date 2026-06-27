@@ -1435,19 +1435,31 @@ export default function PlunkApp() {
 
                     {/* Confirm modal */}
                     {pendingOrder && (
-                      <div className="absolute inset-0 z-50 flex items-end md:items-center justify-center pointer-events-none p-4 md:p-0">
-                        <div className="absolute inset-0 bg-neutral-900/20 backdrop-blur-sm pointer-events-auto" onClick={() => setPendingOrder(null)}></div>
-                        <div className="w-full max-w-sm bg-white rounded-3xl border border-neutral-200 shadow-2xl p-6 pointer-events-auto z-10 flex flex-col gap-6 animate-in slide-in-from-bottom-10 md:zoom-in-95">
-                          <div className="text-center"><div className="text-xs font-bold uppercase tracking-widest text-neutral-400 mb-1">Confirm Trade</div><div className="text-2xl font-black text-neutral-900">{pendingOrder.duration.toUpperCase()} {pendingOrder.asset.ticker}</div></div>
-                          <div className="bg-neutral-50 rounded-2xl p-4 border border-neutral-200 flex flex-col gap-3">
-                            <div className="flex justify-between items-center"><span className="text-xs font-bold text-neutral-500 uppercase">Direction</span><span className={`font-black text-sm px-2 py-0.5 rounded border ${pendingOrder.direction === 'BUY' ? 'bg-green-50 text-green-700 border-green-200' : 'bg-red-50 text-red-600 border-red-200'}`}>{pendingOrder.direction}</span></div>
-                            <div className="flex justify-between items-center"><span className="text-xs font-bold text-neutral-500 uppercase">Size</span><span className="font-black text-neutral-900">${pendingOrder.size}</span></div>
-                            <div className="flex justify-between items-center"><span className="text-xs font-bold text-neutral-500 uppercase">Entry Price</span><span className="font-black text-neutral-900">${pendingOrder.formattedPrice}</span></div>
+                      <div className="absolute inset-0 z-50 flex items-end md:items-center justify-center p-4 md:p-0">
+                        <div className="absolute inset-0 bg-neutral-950/75 backdrop-blur-md pointer-events-auto" onClick={() => setPendingOrder(null)}></div>
+                        <div className="w-full max-w-md bg-white rounded-[2rem] border border-white/60 shadow-2xl p-6 pointer-events-auto z-10 flex flex-col gap-6 animate-in slide-in-from-bottom-10 md:zoom-in-95">
+                          <div className="text-center">
+                            <div className="text-[11px] font-black uppercase tracking-[0.28em] text-neutral-400 mb-2">Confirm</div>
+                            <h3 className="text-2xl font-black text-neutral-900 tracking-tight">Press Enter or click to confirm</h3>
+                            <p className="text-sm font-medium text-neutral-500 mt-2">Review the trade, then place it with the action button below.</p>
                           </div>
-                          <div className="flex flex-col gap-2">
-                            <button onClick={executeOrder} className="w-full bg-neutral-900 text-white font-bold py-4 rounded-xl shadow-md hover:bg-neutral-800 transition-colors">Confirm {hotkeysEnabled ? '(Press Enter)' : ''}</button>
-                            <button onClick={() => setPendingOrder(null)} className="w-full bg-white text-neutral-500 font-bold py-3 rounded-xl hover:bg-neutral-50 border border-transparent hover:border-neutral-200 transition-all text-sm">Cancel (Esc)</button>
+
+                          <div className="bg-neutral-50 rounded-2xl p-5 border border-neutral-200 shadow-inner">
+                            <div className="flex justify-between items-center mb-3"><span className="text-neutral-500 font-bold text-xs uppercase tracking-widest">Contract</span><span className="font-black text-base text-neutral-900">{pendingOrder.duration.toUpperCase()} {pendingOrder.asset.ticker}</span></div>
+                            <div className="flex justify-between items-center mb-3"><span className="text-neutral-500 font-bold text-xs uppercase tracking-widest">Side</span><span className={`font-black text-sm px-2.5 py-0.5 rounded-md ${pendingOrder.direction === 'BUY' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-600'}`}>{pendingOrder.direction === 'BUY' ? 'YES' : 'NO'}</span></div>
+                            <div className="flex justify-between items-center mb-3"><span className="text-neutral-500 font-bold text-xs uppercase tracking-widest">Size</span><span className="font-black text-base text-neutral-900">${pendingOrder.size.toFixed(2)}</span></div>
+                            <div className="flex justify-between items-center mb-3"><span className="text-neutral-500 font-bold text-xs uppercase tracking-widest">Avg Price</span><span className="font-black text-base text-neutral-900">${pendingOrder.formattedPrice}</span></div>
+                            <div className="flex justify-between items-center mt-5 pt-4 border-t border-neutral-200"><span className="text-neutral-900 font-black text-sm uppercase tracking-widest">Est. Payout</span><span className="font-black text-2xl text-green-600">${(pendingOrder.size / pendingOrder.price).toFixed(2)}</span></div>
                           </div>
+
+                          <div className={`rounded-2xl border px-5 py-4 text-center shadow-md ${pendingOrder.direction === 'BUY' ? 'bg-green-600 border-green-500 text-white' : 'bg-red-600 border-red-500 text-white'}`}>
+                            <div className="text-[11px] font-black uppercase tracking-[0.24em] opacity-80 mb-1">Action</div>
+                            <button onClick={executeOrder} className="w-full text-xl font-black tracking-tight">
+                              {pendingOrder.direction === 'BUY' ? 'Buy Yes' : 'Buy No'}
+                            </button>
+                          </div>
+
+                          <button onClick={() => setPendingOrder(null)} className="w-full bg-white text-neutral-500 font-bold py-3 rounded-xl hover:bg-neutral-50 border border-neutral-200 transition-all text-sm">Cancel (Esc)</button>
                         </div>
                       </div>
                     )}
